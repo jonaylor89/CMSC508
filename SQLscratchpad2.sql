@@ -154,7 +154,7 @@ BEGIN
     IF (SELECT salary FROM EMPLOYEES WHERE employee_id = :new.manager_id) < :new.salary
     THEN
       RAISE invalid_salary;
-    END IF
+    END IF;
   END IF;
 END;
 
