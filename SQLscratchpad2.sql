@@ -113,15 +113,14 @@ END;
 -- 1.)
 
 CREATE OR REPLACE TRIGGER smaller_than_pres
-ON EMPLOYEES
 BEFORE INSERT OR UPDATE
+ON EMPLOYEES
 FOR EACH ROW
 DECLARE
   pres_salary EMPLOYEES%TYPE;
   pres_id EMPLOYEES%TYPE;
   invalid_salary EXCEPTION;
   PRAGMA EXCPTION_INIT(invalid_salary, 80808);
-AS
 BEGIN
 
   SELECT salary, employee_id INTO pres_salary, pres_id
@@ -130,7 +129,7 @@ BEGIN
 
   IF UPDATING AND :new.employee_id = pres_id AND :new.salary < pres_salary
   THEN
-    IF (MAX(salary) FROM EMPLOYEES WHERE employee_id <> pres_id) > :new.salary
+    IF (SELECT MAX(salary) FROM EMPLOYEES WHERE employee_id <> pres_id) > :new.salary
     THEN
       RAISE invalid_salary;
     END IF;
@@ -138,18 +137,18 @@ BEGIN
     IF pres_salary < :new.salary
     THEN
       RAISE invalid_salary;
+    END IF;
   END IF;
 END;
 
 -- 2.)
 
 CREATE OR REPLACE TRIGGER smaller_than_manager
-ON EMPLOYEES
 BEFORE INSERT OR UPDATE
+ON EMPLOYEES
 DECLARE
   invalid_salary EXCEPTION;
   PRAGMA EXCEPTION_INIT(invalid_salary, 80808);
-AS
 BEGIN
   IF :new.manager_id IS NOT NULL
     IF (SELECT salary FROM EMPLOYEES WHERE employee_id = :new.manager_id) < :new.salary
@@ -167,8 +166,8 @@ CREATE TABLE SUBCOUNT (
 );
 
 CREATE OR REPLACE TRIGGER update_subcount
-ON EMPLOYEES
 AFTER INSERT OR UPDATE
+ON EMPLOYEES
 AS
 BEGIN
   -- If the new employee has a manager_id that isn't null
@@ -177,8 +176,8 @@ BEGIN
 END;
 
 CREATE OR REPLACE TRIGGER remove_employee
-ON EMPLOYEES
 AFTER DELETE
+ON EMPLOYEES
 AS
 BEGIN
   -- Check is the employee had a manager_id that wasn't null
@@ -189,8 +188,8 @@ END;
 -- 4.)
 
 CREATE OR REPLACE TRIGGER sub_raise
-ON EMPLOYEES
 AFTER INSERT
+ON EMPLOYEES
 AS
 BEGIN
   -- Check if new employee has a manager
@@ -206,8 +205,8 @@ CREATE TABLE log (
 );
 
 CREATE OR REPLACE TRIGGER employee_log_update
-ON EMPLOYEES
 AFTER INSERT OR UPDATE OR DELETE
+ON EMPLOYEES
 AS
 BEGIN
     -- If it was an insert, log insert msg
