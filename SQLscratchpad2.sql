@@ -132,7 +132,7 @@ BEFORE INSERT
 AS
 BEGIN
   -- If the new salary is greater than the old one and greater
-  --  then check if the employee has a manager
+  --  Then check if the employee has a manager
   --    If they do then make sure the new salary isn't greater than the manager
   --      If it is then do nothing
 END;
@@ -149,7 +149,9 @@ ON EMPLOYEES
 AFTER INSERT OR UPDATE
 AS
 BEGIN
-
+  -- If the new employee has a manager_id that isn't null
+  --  Then check if the manager_id is already in the subcount TABLE
+  --  If it isn't, then add if, otherwise update it by one
 END;
 
 CREATE OR REPLACE TRIGGER remove_employee
@@ -157,7 +159,9 @@ ON EMPLOYEES
 AFTER DELETE
 AS
 BEGIN
-
+  -- Check is the employee had a manager_id that wasn't null
+  --  If it isn't then it should already be in the subcount table
+  --  so decrement the subcount for the manager_id
 END;
 
 -- 4.)
@@ -181,10 +185,12 @@ CREATE TABLE log (
 
 CREATE OR REPLACE TRIGGER employee_log_update
 ON EMPLOYEES
-AFTER INSERT DELETE
+AFTER INSERT OR UPDATE OR DELETE
 AS
 BEGIN
-
+    -- If it was an insert, log insert msg
+    -- Else if it was an update, log update msg
+    -- Else log a delete msg
 END;
 
 /***************************************/
