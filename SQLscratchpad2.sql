@@ -75,7 +75,7 @@ CREATE OR REPLACE FUNCTION format_phone (phone_number VARCHAR(15))
 IS
   final_format VARCHAR(15)
 BEGIN
-  RETURN "(" || SUBSTRING(phone_number, 0, 4) || ")" || SUBSTRING(phone_number, 5, 9) || "-" || SUBSTRING(phone_number, 10, 15);
+  RETURN '(' || SUBSTRING(phone_number, 0, 4) || ')' || SUBSTRING(phone_number, 5, 9) || '-' || SUBSTRING(phone_number, 10, 15);
 END;
 
 -- 4.)
@@ -114,14 +114,29 @@ END;
 
 CREATE OR REPLACE TRIGGER smaller_than_pres
 ON EMPLOYEES
-BEFORE INSERT
+BEFORE INSERT OR UPDATE
+FOR EACH ROW
+DECLARE
+  pres_salary EMPLOYEES%TYPE;
+  pres_id EMPLOYEES%TYPE;
 AS
 BEGIN
-  -- If the new salary is for the president and lower
-  --  then make sure that everyone else's isn't higher
-  -- Else if new salary is greater than president
-  --  Then don't INSERT
-  --
+
+  SELECT salary, employee_id INTO pres_salary, pres_id
+  FROM EMPLOYEES
+  WHERE job_id = 'AD_PRES';
+
+  IF UPDATING AND :new.employee_id = pres_id AND :new.salary < pres_salary
+  THEN
+    IF (MAX(salary) FROM EMPLOYEES WHERE employee_id <> pres_id) > :new.salary
+    THEN
+      RAISE EXCEPTION;
+    END IF;
+  ELSE
+    IF pres_salary < :new.salary
+    THEN
+      RAISE EXPTION;
+  END IF;
 END;
 
 -- 2.)
