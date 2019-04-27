@@ -119,6 +119,8 @@ FOR EACH ROW
 DECLARE
   pres_salary EMPLOYEES%TYPE;
   pres_id EMPLOYEES%TYPE;
+  invalid_salary EXCEPTION;
+  PRAGMA EXCPTION_INIT(invalid_salary, 80808);
 AS
 BEGIN
 
@@ -130,12 +132,12 @@ BEGIN
   THEN
     IF (MAX(salary) FROM EMPLOYEES WHERE employee_id <> pres_id) > :new.salary
     THEN
-      RAISE EXCEPTION;
+      RAISE invalid_salary;
     END IF;
   ELSE
     IF pres_salary < :new.salary
     THEN
-      RAISE EXPTION;
+      RAISE invalid_salary;
   END IF;
 END;
 
@@ -143,13 +145,18 @@ END;
 
 CREATE OR REPLACE TRIGGER smaller_than_manager
 ON EMPLOYEES
-BEFORE INSERT
+BEFORE INSERT OR UPDATE
+DECLARE
+  invalid_salary EXCEPTION;
+  PRAGMA EXCEPTION_INIT(invalid_salary, 80808);
 AS
 BEGIN
-  -- If the new salary is greater than the old one and greater
-  --  Then check if the employee has a manager
-  --    If they do then make sure the new salary isn't greater than the manager
-  --      If it is then do nothing
+  IF :new.manager_id IS NOT NULL
+    IF (SELECT salary FROM EMPLOYEES WHERE employee_id = :new.manager_id) < :new.salary
+    THEN
+      RAISE invalid_salary;
+    END IF
+  END IF;
 END;
 
 -- 3.)
