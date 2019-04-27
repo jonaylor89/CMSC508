@@ -75,7 +75,7 @@ CREATE OR REPLACE FUNCTION format_phone (phone_number VARCHAR(15))
 IS
   final_format VARCHAR(15)
 BEGIN
-
+  RETURN "(" || SUBSTRING(phone_number, 0, 4) || ")" || SUBSTRING(phone_number, 5, 9) || "-" || SUBSTRING(phone_number, 10, 15);
 END;
 
 -- 4.)
@@ -107,14 +107,6 @@ BEGIN
 END;
 
 -- 6.)
-
-CREATE OR REPLACE PROCEDURE create_table ()
-IS
-BEGIN
-  CREATE TABLE new_table
-END;
-
-/***************************************/
 
 -- Triggers
 
