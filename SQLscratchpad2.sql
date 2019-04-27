@@ -1,6 +1,8 @@
 
 /*****************************************/
 
+-- Advanced SQL
+
 -- 1.)
 
 CREATE VIEW EMPLOYEES_VU AS
@@ -28,34 +30,81 @@ CREATE SEQUENCE DEPT_ID_SEQ
 AS NUMBER(7)
 START WITH 200
 INCREMENT BY 10
-MAXVALUE 1000
+MAXVALUE 1000;
 
 -- 8.)
 -- 9.)
 
 CREATE INDEX NAME_IDX
-ON DEPT.NAME
+ON DEPT.NAME;
 
 -- 10.)
 
 CREATE SYNONYM EMP
-FOR EMPLOYEES
+FOR EMPLOYEES;
 
 /****************************************/
 
+-- Functions and Procedures
+
 -- 1.)
+
+CREATE SEQUENCE employee_pk_seq
+AS NUMBER(7)
+START WITH 1
+INCREMENT BY 1;
 
 -- 2.)
 
+CREATE OR REPLACE FUNCTION getName (employee_pk NUMBER(7))
+  RETURN VARCHAR(25)
+IS
+  full_name VARCHAR(25);
+BEGIN
+  SELECT e.first_name || " " || e.last_name INTO full_name
+  FROM EMPLOYEES e
+  WHERE e.employee_id = employee_pk;
+
+  RETURN full_name;
+END;
+
 -- 3.)
+
+CREATE OR REPLACE FUNCTION format_phone (phone_number NUMBER(7))
+  RETURN VARCHAR(15)
+IS
+BEGIN
+
+END;
 
 -- 4.)
 
+CREATE OR REPLACE FUNCTION dept_avg (dept_id NUMBER(7))
+  RETURN NUMBER(7)
+IS
+BEGIN
+
+END;
+
 -- 5.)
+
+CREATE OR REPLACE PROCEDURE increase_mgr ()
+IS
+BEGIN
+
+END;
 
 -- 6.)
 
+CREATE OR REPLACE PROCEDURE create_table ()
+IS
+BEGIN
+
+END;
+
 /***************************************/
+
+-- Triggers
 
 -- 1.)
 
@@ -64,10 +113,12 @@ ON EMPLOYEES
 BEFORE INSERT
 AS
 BEGIN
-  -- If new salary is greater than  president
+  -- If the new salary is for the president and lower
+  --  then make sure that everyone else's isn't higher
+  -- Else if new salary is greater than president
   --  Then don't INSERT
   --
-END
+END;
 
 -- 2.)
 
@@ -76,23 +127,34 @@ ON EMPLOYEES
 BEFORE INSERT
 AS
 BEGIN
-
-END
+  -- If the new salary is greater than the old one and greater
+  --  then check if the employee has a manager
+  --    If they do then make sure the new salary isn't greater than the manager
+  --      If it is then do nothing
+END;
 
 -- 3.)
 
 CREATE TABLE SUBCOUNT (
   PRIMARY KEY employee_id NUMBER(7) REFERENCES EMPLOYEES
   sub_count NUMBER(7)
-)
+);
 
 CREATE OR REPLACE TRIGGER update_subcount
 ON EMPLOYEES
-AFTER INSERT
+AFTER INSERT OR UPDATE
 AS
 BEGIN
-  
-END
+
+END;
+
+CREATE OR REPLACE TRIGGER remove_employee
+ON EMPLOYEES
+AFTER DELETE
+AS
+BEGIN
+
+END;
 
 -- 4.)
 
@@ -101,14 +163,17 @@ ON EMPLOYEES
 AFTER INSERT
 AS
 BEGIN
-
-END
+  -- Check if new employee has a manager
+  -- if they do then find the manager and increase their salary by 5%
+END;
 
 -- 5.)
 
 CREATE TABLE log (
-
-)
+  PRIMARY KEY log_event_id NUMBER(7),
+  date DATE,
+  description VARCHAR(100)
+);
 
 CREATE OR REPLACE TRIGGER employee_log_update
 ON EMPLOYEES
@@ -116,7 +181,7 @@ AFTER INSERT DELETE
 AS
 BEGIN
 
-END
+END;
 
 /***************************************/
 
@@ -134,22 +199,8 @@ AFTER DELETE OR INSERT OR UPDATE department_id, salary, ON employees
     IF (UPDATING AND)
 
     END IF;
-  END
+  END;
 END;
-
-CREATE OR REPLACE TRIGGER new_employee_bonus
-BEFORE INSERT ON employees
-FOR EACH ROW
-BEGIN
-    UPDATE EMPLOYEES
-    SET salary = salary * 1.05
-    WHERE department_id = :new.department_id
-END;
-
-
-CREATE TABLE
-
-
 
 
 /************************************/
