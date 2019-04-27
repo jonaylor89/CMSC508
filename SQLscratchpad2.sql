@@ -70,9 +70,10 @@ END;
 
 -- 3.)
 
-CREATE OR REPLACE FUNCTION format_phone (phone_number NUMBER(7))
+CREATE OR REPLACE FUNCTION format_phone (phone_number VARCHAR(15))
   RETURN VARCHAR(15)
 IS
+  final_format VARCHAR(15)
 BEGIN
 
 END;
@@ -82,16 +83,27 @@ END;
 CREATE OR REPLACE FUNCTION dept_avg (dept_id NUMBER(7))
   RETURN NUMBER(7)
 IS
+  dept_avg_salary NUMBER(7)
 BEGIN
+  SELECT AVG(e.salary) INTO dept_avg_salary
+  FROM EMPLOYEES e
+  WHERE e.department_id = dept_id;
 
+  RETURN dept_avg_salary;
 END;
 
 -- 5.)
 
-CREATE OR REPLACE PROCEDURE increase_mgr ()
+CREATE OR REPLACE PROCEDURE increase_mgr (sub_id NUMBER(7), increase_pct NUMBER(7))
 IS
 BEGIN
-
+  UPDATE EMPLOYEES
+  SET salary += salary * increase_pct
+  WHERE employee_id = (
+    SELECT e.manager_id
+    FROM EMPLOYEES e
+    WHERE e.employee_id = sub_id
+  );
 END;
 
 -- 6.)
@@ -99,7 +111,7 @@ END;
 CREATE OR REPLACE PROCEDURE create_table ()
 IS
 BEGIN
-
+  CREATE TABLE new_table
 END;
 
 /***************************************/
