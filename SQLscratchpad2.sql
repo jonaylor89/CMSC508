@@ -232,8 +232,27 @@ BEGIN
     VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :new.employee_id || ' inserted')
   ELSE IF UPDATING
   THEN
-    INSERT INTO LOG (log_event_id, date, description)
-    VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :new.employee_id || ' updated ' || {} || ' from ' || {} || ' to ' || {})
+    IF :new.last_name <> :old.last_name
+    THEN
+      INSERT INTO LOG (log_event_id, date, description)
+      VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :new.employee_id || ' updated last name from ' || :old.last_name || ' to ' || :new.last_name)
+
+    ELSE IF :new.first_name <> :old.first_name
+    THEN
+      INSERT INTO LOG (log_event_id, date, description)
+      VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :new.employee_id || ' updated first name from ' || :old.first_name || ' to ' || :new.first_name)
+
+    ELSE IF :new.department_id <> :old.department_id
+    THEN
+      INSERT INTO LOG (log_event_id, date, description)
+      VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :new.employee_id || ' updated department from ' || :old.department_id || ' to ' || :new.department_id)
+
+    ELSE IF :new.salary <> :old.salary
+    THEN
+      INSERT INTO LOG (log_event_id, date, description)
+      VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :new.employee_id || ' updated salary from ' || :old.salary || ' to ' || :new.salary)
+
+    END IF;
 
   ELSE
     INSERT INTO LOG (log_event_id, date, description)
