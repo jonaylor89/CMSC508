@@ -120,7 +120,7 @@ DECLARE
   pres_salary EMPLOYEES%TYPE;
   pres_id EMPLOYEES%TYPE;
   invalid_salary EXCEPTION;
-  PRAGMA EXCPTION_INIT(invalid_salary, 80808);
+  PRAGMA EXCPTION_INIT(invalid_salary, -6502);
 BEGIN
 
   SELECT salary, employee_id INTO pres_salary, pres_id
@@ -148,7 +148,7 @@ BEFORE INSERT OR UPDATE
 ON EMPLOYEES
 DECLARE
   invalid_salary EXCEPTION;
-  PRAGMA EXCEPTION_INIT(invalid_salary, 80808);
+  PRAGMA EXCEPTION_INIT(invalid_salary, -6502);
 BEGIN
   IF :new.manager_id IS NOT NULL
     IF (SELECT salary FROM EMPLOYEES WHERE employee_id = :new.manager_id) < :new.salary
@@ -170,9 +170,18 @@ AFTER INSERT OR UPDATE
 ON EMPLOYEES
 AS
 BEGIN
-  -- If the new employee has a manager_id that isn't null
-  --  Then check if the manager_id is already in the subcount TABLE
-  --  If it isn't, then add if, otherwise update it by one
+  IF :new.manager_id IS NOT NULL
+  THEN
+    IF EXISTS (SELECT * FROM SUBCOUNT WHERE employee_id = :new.manager_id)
+    THEN
+      UPDATE SUBCOUNT
+      SET sub_count = subcount + 1
+      WHERE employee_id = :new.manager_id;
+    ELSE
+      INSERT INTO SUBCOUNT (employee_id, sub_count)
+      VALUES (:new.manager_id, 1);
+    END IF;
+  END IF;
 END;
 
 CREATE OR REPLACE TRIGGER remove_employee
@@ -180,9 +189,12 @@ AFTER DELETE
 ON EMPLOYEES
 AS
 BEGIN
-  -- Check is the employee had a manager_id that wasn't null
-  --  If it isn't then it should already be in the subcount table
-  --  so decrement the subcount for the manager_id
+  IF :old.manager_id IS NOT NULL
+  THEN
+    UPDATE SUBCOUNT
+    SET sub_count = sub_count - 1
+    WHERE employee_id = :old.manager_id;
+  END IF;
 END;
 
 -- 4.)
@@ -198,6 +210,11 @@ END;
 
 -- 5.)
 
+CREATE SEQUENCE log_seq
+AS NUMBER(7)
+INCREMENT BY 1
+START WITH 1
+
 CREATE TABLE log (
   PRIMARY KEY log_event_id NUMBER(7),
   date DATE,
@@ -209,29 +226,20 @@ AFTER INSERT OR UPDATE OR DELETE
 ON EMPLOYEES
 AS
 BEGIN
-    -- If it was an insert, log insert msg
-    -- Else if it was an update, log update msg
-    -- Else log a delete msg
+  IF INSERTING
+  THEN
+    INSERT INTO LOG (log_event_id, date, description)
+    VALUES (log_seq.NEXTVAL, SYSDATE, "Employee {} inserted")
+  ELSE IF UPDATING
+  THEN
+    INSERT INTO LOG (log_event_id, date, description)
+    VALUES (log_seq.NEXTVAL, SYSDATE, "Employee {} updated {} from {} to {}")
+
+  ELSE
+    INSERT INTO LOG (log_event_id, date, description)
+    VALUES (log_seq.NEXTVAL, SYSDATE, "Employee {} removed")
+
+  END IF;
 END;
 
 /***************************************/
-
-
-CREATE OR REPLACE TRIGGER total_salary
-AFTER DELETE OR INSERT OR UPDATE department_id, salary, ON employees
-  FOR EACH ROW
-  BEGIN
-    IF DELETING OR (UPDATING AND :old.department_id != :new.department_id)
-
-    END IF;
-    IF INSERTING OR (UPDATING AND)
-
-    END IF;
-    IF (UPDATING AND)
-
-    END IF;
-  END;
-END;
-
-
-/************************************/
