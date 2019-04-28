@@ -229,15 +229,15 @@ BEGIN
   IF INSERTING
   THEN
     INSERT INTO LOG (log_event_id, date, description)
-    VALUES (log_seq.NEXTVAL, SYSDATE, "Employee {} inserted")
+    VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :new.employee_id || ' inserted')
   ELSE IF UPDATING
   THEN
     INSERT INTO LOG (log_event_id, date, description)
-    VALUES (log_seq.NEXTVAL, SYSDATE, "Employee {} updated {} from {} to {}")
+    VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :new.employee_id || ' updated ' || {} || ' from ' || {} || ' to ' || {})
 
   ELSE
     INSERT INTO LOG (log_event_id, date, description)
-    VALUES (log_seq.NEXTVAL, SYSDATE, "Employee {} removed")
+    VALUES (log_seq.NEXTVAL, SYSDATE, 'Employee ' || :old.employee_id || ' removed')
 
   END IF;
 END;
