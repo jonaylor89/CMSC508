@@ -13,7 +13,7 @@ INCREMENT BY 1;
 
 CREATE OR REPLACE TRIGGER salary_log 
 AFTER INSERT OR UPDATE OR DELETE
-ON EMPLOYEES
+OF SALARY ON EMPLOYEES
 FOR EACH ROW
 BEGIN
     IF INSERTING
@@ -41,7 +41,7 @@ BEGIN
                             employee_id, 
                             previous_salary, 
                             new_salary) 
-        VALUES (update_id_seq.NEXTVAL, :new.employee_id, :old.salary, NULL);
+        VALUES (update_id_seq.NEXTVAL, :old.employee_id, :old.salary, NULL);
         
     END IF;
 END;
